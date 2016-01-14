@@ -1,11 +1,13 @@
 <?php
-//This will show any PHP errors. It is turned off by default for security reasons.
-ini_set('display_errors', 1);
-
+//Connect to our database
 require_once('src/connect.php');
+
+//Initialize our variables with default values.
 $error = false;
 $success = false;
+$users = array();
 
+//Check for the addUser in the $_POST super global which means someone submitted the form.
 if(@$_POST['addUser']){
     /**
      * New user was submitted. Make sure name and email are present!
@@ -29,10 +31,11 @@ if(@$_POST['addUser']){
         )
     );
 
+    //Always check the result for errors!
     if($result){
-        $success .= "User " . $_POST['email'] . " was successfully saved.";
+        $success .= "<p>User " . $_POST['email'] . " was successfully saved.</p>";
     }else{
-        $error .= "There was an error saving " . $_POST['email'];
+        $error .= "<p>There was an error saving " . $_POST['email'] . '</p>';
     }
 }
 
@@ -40,8 +43,13 @@ if(@$_POST['addUser']){
  * We'll always want to pull the users to show them in the table
  */
 $stmt = $dbh->prepare('SELECT * FROM users');
-$stmt->execute();
-$users = $stmt->fetchAll();
+$result = $stmt->execute();
+
+if(!$result){
+    $error .= '<p>There was an error processing your request.</p>';
+}else {
+    $users = $stmt->fetchAll();
+}
 ?>
 
 <!DOCTYPE html>
@@ -56,7 +64,6 @@ $users = $stmt->fetchAll();
         <?php
         if($error){
             echo $error;
-            echo '<br /><br />';
         }
         ?>
     </div>
@@ -65,13 +72,13 @@ $users = $stmt->fetchAll();
         <?php
         if($success){
             echo $success;
-            echo '<br /><br />';
         }
         ?>
     </div>
 
     <h1>Add User</h1>
 
+<!--    Make sure the name attribute of your form elements matches the $_POST array elements. Case matters!-->
     <form name="addUser" method="post">
         <input name="name" placeholder="Your Name" />
         <input name="email" placeholder="Your Email" />

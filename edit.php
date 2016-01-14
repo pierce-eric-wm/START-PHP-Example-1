@@ -5,6 +5,7 @@ require_once('src/connect.php');
 //Initialize variables to default values
 $error = false;
 $success = false;
+$user = array();
 
 //Be sure they are passing an ID
 if(!$_GET['id']){
@@ -27,15 +28,15 @@ if(@$_POST['editUser']){
      * not best practice but it's close enough to get the idea.
      */
     if(!$_POST['email']){
-        $error = 'Email is a required field. <br />';
+        $error = '<p>Email is a required field.</p>';
     }
 
     if(!$_POST['name']){
-        $error .= 'Name is a required field. <br />';
+        $error .= '<p>Name is a required field.</p>';
     }
 
     if(!$_GET['id']){
-        $error .= 'ID is a required field.<br />';
+        $error .= '<p>ID is a required field.</p>';
     }
 
     /**
@@ -49,9 +50,9 @@ if(@$_POST['editUser']){
 
     //Result will be TRUE if the update was successful
     if($result){
-        $success = 'Record successfully updated!';
+        $success .= '<p>Record successfully updated!</p>';
     }else{
-        $error = 'There was a problem updating the record: ' . $stmt->errorInfo()[2];
+        $error .= '<p>There was a problem updating the record</p>';
     }
 }
 
@@ -59,12 +60,12 @@ if(@$_POST['editUser']){
 $stmt = $dbh->prepare('SELECT * FROM users WHERE id=:id');
 $result = $stmt->execute(array('id'=>$_GET['id']));
 
-//If there is an error code, set the $error variable to the message.
-if($result){
-    $error .= $stmt->errorInfo()[2];
+//$result will be true if all went well.
+if(!$result){
+    $error .= '<p>There was an error processing your request</p>';
+}else {
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 }
-
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 
 
@@ -81,7 +82,6 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
         <?php
         if($success){
             echo $success;
-            echo '<br /></br />';
         }
         ?>
     </div>
@@ -90,7 +90,6 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
         <?php
         if($error){
             echo $error;
-            echo '<br /><br />';
         }
         ?>
     </div>
